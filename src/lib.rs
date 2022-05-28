@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum MineCraftError {
+pub enum MinecraftError {
     /// An Error caused by I/O
     #[error(transparent)]
     Io(#[from] std::io::Error),
@@ -17,25 +17,25 @@ pub enum MineCraftError {
     Zip(#[from] zip::result::ZipError),
 }
 
-pub type MineCraftResult<T> = Result<T, MineCraftError>;
+pub type MinecraftResult<T> = Result<T, MinecraftError>;
 
 #[cfg(windows)]
-pub fn vanilla_root_path() -> MineCraftResult<PathBuf> {
+pub fn vanilla_root_path() -> MinecraftResult<PathBuf> {
     Ok(PathBuf::from(&std::env::var("appdata")?).join(".minecraft"))
 }
 #[cfg(target_os = "linux")]
-pub fn vanilla_root_path() -> MineCraftResult<PathBuf> {
+pub fn vanilla_root_path() -> MinecraftResult<PathBuf> {
     Ok(PathBuf::from(&std::env::var("HOME")?).join(".minecraft"))
 }
 #[cfg(target_os = "macos")]
-pub fn vanilla_root_path() -> MineCraftResult<PathBuf> {
+pub fn vanilla_root_path() -> MinecraftResult<PathBuf> {
     Ok(PathBuf::from(&std::env::var("HOME")?)
         .join("Library")
         .join("Application Support")
         .join("cminecraft"))
 }
 
-pub fn fetch_assets(version: &str) -> MineCraftResult<()> {
+pub fn fetch_assets(version: &str) -> MinecraftResult<()> {
     let buf = vanilla_root_path()?
         .join("versions")
         .join(version)
