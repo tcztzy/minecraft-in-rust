@@ -5,6 +5,17 @@ use std::path::PathBuf;
 pub fn vanilla_root_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
     Ok(PathBuf::from(&std::env::var("appdata")?).join(".minecraft"))
 }
+#[cfg(target_os = "linux")]
+pub fn vanilla_root_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
+    Ok(PathBuf::from(&std::env::var("HOME")?).join(".minecraft"))
+}
+#[cfg(target_os = "macos")]
+pub fn vanilla_root_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
+    Ok(PathBuf::from(&std::env::var("HOME")?)
+        .join("Library")
+        .join("Application Support")
+        .join("cminecraft"))
+}
 
 pub fn fetch_assets(version: &str) -> Result<(), Box<dyn std::error::Error>> {
     let buf = vanilla_root_path()?
