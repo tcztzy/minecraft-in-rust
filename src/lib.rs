@@ -1,23 +1,41 @@
 use log::info;
 use std::path::PathBuf;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum MineCraftError {
+    /// An Error caused by I/O
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    /// A VarError caused by env
+    #[error(transparent)]
+    Env(#[from] std::env::VarError),
+
+    /// An Error caused by Zip
+    #[error(transparent)]
+    Zip(#[from] zip::result::ZipError),
+}
+
+pub type MineCraftResult<T> = Result<T, MineCraftError>;
 
 #[cfg(windows)]
-pub fn vanilla_root_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
+pub fn vanilla_root_path() -> MineCraftResult<PathBuf> {
     Ok(PathBuf::from(&std::env::var("appdata")?).join(".minecraft"))
 }
 #[cfg(target_os = "linux")]
-pub fn vanilla_root_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
+pub fn vanilla_root_path() -> MineCraftResult<PathBuf> {
     Ok(PathBuf::from(&std::env::var("HOME")?).join(".minecraft"))
 }
 #[cfg(target_os = "macos")]
-pub fn vanilla_root_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
+pub fn vanilla_root_path() -> MineCraftResult<PathBuf> {
     Ok(PathBuf::from(&std::env::var("HOME")?)
         .join("Library")
         .join("Application Support")
         .join("cminecraft"))
 }
 
-pub fn fetch_assets(version: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn fetch_assets(version: &str) -> MineCraftResult<()> {
     let buf = vanilla_root_path()?
         .join("versions")
         .join(version)
